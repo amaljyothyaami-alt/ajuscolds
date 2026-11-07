@@ -8,37 +8,25 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = "eu-north-1"
 }
 
-data "aws_ami" "amazon_linux" {
-  most_recent = true
-  owners      = ["amazon"]
+module "ec2" {
+  source = "./modules/ec2"
 
-  filter {
-    name   = "name"
-    values = ["al2023-ami-*-x86_64"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-}
-
-resource "aws_instance" "example" {
-  ami           = data.aws_ami.amazon_linux.id
+  name          = "example-ec2"
   instance_type = "t3.micro"
+}
 
-  tags = {
-    Name = "example-ec2"
-  }
+moved {
+  from = aws_instance.example
+  to   = module.ec2.aws_instance.example
 }
 
 output "instance_id" {
-  value = aws_instance.example.id
+  value = module.ec2.instance_id
 }
 
 output "public_ip" {
-  value = aws_instance.example.public_ip
+  value = module.ec2.public_ip
 }
